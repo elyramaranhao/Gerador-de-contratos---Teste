@@ -16,29 +16,32 @@ with st.form("formulario"):
     data_fim = st.date_input("Data de término", date.today())
     submitted = st.form_submit_button("Gerar contrato")
 
+from io import BytesIO
+
 if submitted:
-    # Carrega o modelo
     doc = Document("modelo_contrato.docx")
 
-    # Substitui os placeholders de forma segura
-for p in doc.paragraphs:
-    if p.text:
-        p.text = p.text.replace("{{NOME}}", nome)
-        p.text = p.text.replace("{{CPF}}", cpf)
-        p.text = p.text.replace("{{ENDERECO}}", endereco)
-        p.text = p.text.replace("{{VALOR}}", valor)
-        p.text = p.text.replace("{{DATA_INICIO}}", str(data_inicio))
-        p.text = p.text.replace("{{DATA_FIM}}", str(data_fim))
+    # Substituições seguras
+    for p in doc.paragraphs:
+        if p.text:
+            p.text = p.text.replace("{{NOME}}", nome)
+            p.text = p.text.replace("{{CPF}}", cpf)
+            p.text = p.text.replace("{{ENDERECO}}", endereco)
+            p.text = p.text.replace("{{VALOR}}", valor)
+            p.text = p.text.replace("{{DATA_INICIO}}", str(data_inicio))
+            p.text = p.text.replace("{{DATA_FIM}}", str(data_fim))
 
-    # Salva o contrato em memória
-    buffer = BytesIO()
-    doc.save(buffer)
-    buffer.seek(0)
+    # CORRETO: buffer em memória com BytesIO
+    contrato_em_memoria = BytesIO()
+    doc.save(contrato_em_memoria)
+    contrato_em_memoria.seek(0)
 
     st.success("✅ Contrato gerado com sucesso!")
+
     st.download_button(
         label="📥 Baixar contrato",
-        data=buffer.getvalue(),  # lê os bytes diretamente
+        data=contrato_em_memoria.getvalue(),
         file_name=f"Contrato_{nome}.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
+
