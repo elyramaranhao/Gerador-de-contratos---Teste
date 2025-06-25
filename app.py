@@ -28,10 +28,19 @@ if submitted:
         p.text = p.text.replace("{{DATA_INICIO}}", str(data_inicio))
         p.text = p.text.replace("{{DATA_FIM}}", str(data_fim))
 
-  with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmp:
+ with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmp:
     doc.save(tmp.name)
+    tmp_path = tmp.name  # salva o caminho do arquivo
 
 st.success("✅ Contrato gerado com sucesso!")
-with open(tmp.name, "rb") as file:
-    st.download_button("📥 Baixar contrato", file.read(), file_name=f"Contrato_{nome}.docx")
+
+# Lê o arquivo depois de fechar o with
+with open(tmp_path, "rb") as file:
+    st.download_button(
+        label="📥 Baixar contrato",
+        data=file.read(),
+        file_name=f"Contrato_{nome}.docx",
+        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
+
 
