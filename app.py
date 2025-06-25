@@ -16,40 +16,34 @@ with st.form("formulario"):
     data_fim = st.date_input("Data de término", date.today())
     submitted = st.form_submit_button("Gerar contrato")
 
-# Se clicou no botão
-import os
-import tempfile
-
 if submitted:
-    # Abre o modelo
+    # Carrega o modelo
     doc = Document("modelo_contrato.docx")
 
-    # Substitui os campos
+    # Substitui os placeholders
     for p in doc.paragraphs:
-        p.text = p.text.replace("{{NOME}}", nome)
-        p.text = p.text.replace("{{CPF}}", cpf)
-        p.text = p.text.replace("{{ENDERECO}}", endereco)
-        p.text = p.text.replace("{{VALOR}}", valor)
-        p.text = p.text.replace("{{DATA_INICIO}}", str(data_inicio))
-        p.text = p.text.replace("{{DATA_FIM}}", str(data_fim))
+        if "{{NOME}}" in p.text:
+            p.text = p.text.replace("{{NOME}}", nome)
+        if "{{CPF}}" in p.text:
+            p.text = p.text.replace("{{CPF}}", cpf)
+        if "{{ENDERECO}}" in p.text:
+            p.text = p.text.replace("{{ENDERECO}}", endereco)
+        if "{{VALOR}}" in p.text:
+            p.text = p.text.replace("{{VALOR}}", valor)
+        if "{{DATA_INICIO}}" in p.text:
+            p.text = p.text.replace("{{DATA_INICIO}}", str(data_inicio))
+        if "{{DATA_FIM}}" in p.text:
+            p.text = p.text.replace("{{DATA_FIM}}", str(data_fim))
 
-    # Cria arquivo temporário no disco
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmp_file:
-        temp_path = tmp_file.name
-        doc.save(temp_path)
+    # Salva o contrato em memória
+    buffer = BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
 
-    # Lê o conteúdo do arquivo salvo
-    with open(temp_path, "rb") as f:
-        contrato_bytes = f.read()
-
-    # Remove o arquivo temporário do disco
-    os.remove(temp_path)
-
-    # Exibe botão de download
     st.success("✅ Contrato gerado com sucesso!")
     st.download_button(
         label="📥 Baixar contrato",
-        data=contrato_bytes,
+        data=buffer.getvalue(),  # lê os bytes diretamente
         file_name=f"Contrato_{nome}.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
