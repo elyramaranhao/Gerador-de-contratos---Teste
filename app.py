@@ -6,7 +6,7 @@ from io import BytesIO
 st.set_page_config(page_title="Gerador de Contrato", layout="centered")
 st.title("📄 Gerador de Contrato Automático")
 
-# Formulário para preencher os dados
+# Formulário
 with st.form("formulario"):
     nome = st.text_input("Nome do contratante")
     cpf = st.text_input("CPF")
@@ -16,32 +16,31 @@ with st.form("formulario"):
     data_fim = st.date_input("Data de término", date.today())
     submitted = st.form_submit_button("Gerar contrato")
 
-# Se o botão for clicado
+# Só roda se o botão for clicado
 if submitted:
-    # Carrega o modelo
-    doc = Document("modelo_contrato.docx")
+    try:
+        doc = Document("modelo_contrato.docx")
 
-    # Substitui os placeholders de forma segura
-    for p in doc.paragraphs:
-        if p.text:
-            p.text = p.text.replace("{{NOME}}", nome)
-            p.text = p.text.replace("{{CPF}}", cpf)
-            p.text = p.text.replace("{{ENDERECO}}", endereco)
-            p.text = p.text.replace("{{VALOR}}", valor)
-            p.text = p.text.replace("{{DATA_INICIO}}", str(data_inicio))
-            p.text = p.text.replace("{{DATA_FIM}}", str(data_fim))
+        for p in doc.paragraphs:
+            if p.text:
+                p.text = p.text.replace("{{NOME}}", nome)
+                p.text = p.text.replace("{{CPF}}", cpf)
+                p.text = p.text.replace("{{ENDERECO}}", endereco)
+                p.text = p.text.replace("{{VALOR}}", valor)
+                p.text = p.text.replace("{{DATA_INICIO}}", str(data_inicio))
+                p.text = p.text.replace("{{DATA_FIM}}", str(data_fim))
 
-    # Salva o contrato em memória
-    contrato_em_memoria = BytesIO()
-    doc.save(contrato_em_memoria)
-    contrato_em_memoria.seek(0)
+        buffer = BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
 
-    st.success("✅ Contrato gerado com sucesso!")
+        st.success("✅ Contrato gerado com sucesso!")
 
-    # Botão de download com os bytes corretos
-    st.download_button(
-        label="📥 Baixar contrato",
-        data=contrato_em_memoria.getvalue(),
-        file_name=f"Contrato_{nome}.docx",
-        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    )
+        st.download_button(
+            label="📥 Baixar contrato",
+            data=buffer.getvalue(),  # aqui está o segredo
+            file_name=f"Contrato_{nome}.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
+    except Exception as e:
+        st.error(f"Ocorreu um erro ao gerar o contrato: {e}")
