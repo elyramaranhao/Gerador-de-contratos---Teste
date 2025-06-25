@@ -28,8 +28,10 @@ if submitted:
         p.text = p.text.replace("{{DATA_INICIO}}", str(data_inicio))
         p.text = p.text.replace("{{DATA_FIM}}", str(data_fim))
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmp:
-        doc.save(tmp.name)
-        tmp.seek(0)
-        st.success("✅ Contrato gerado com sucesso!")
-        st.download_button("📥 Baixar contrato", tmp, file_name=f"Contrato_{nome}.docx")
+  with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmp:
+    doc.save(tmp.name)
+
+st.success("✅ Contrato gerado com sucesso!")
+with open(tmp.name, "rb") as file:
+    st.download_button("📥 Baixar contrato", file.read(), file_name=f"Contrato_{nome}.docx")
+
