@@ -20,20 +20,15 @@ if submitted:
     # Carrega o modelo
     doc = Document("modelo_contrato.docx")
 
-    # Substitui os placeholders
-    for p in doc.paragraphs:
-        if "{{NOME}}" in p.text:
-            p.text = p.text.replace("{{NOME}}", nome)
-        if "{{CPF}}" in p.text:
-            p.text = p.text.replace("{{CPF}}", cpf)
-        if "{{ENDERECO}}" in p.text:
-            p.text = p.text.replace("{{ENDERECO}}", endereco)
-        if "{{VALOR}}" in p.text:
-            p.text = p.text.replace("{{VALOR}}", valor)
-        if "{{DATA_INICIO}}" in p.text:
-            p.text = p.text.replace("{{DATA_INICIO}}", str(data_inicio))
-        if "{{DATA_FIM}}" in p.text:
-            p.text = p.text.replace("{{DATA_FIM}}", str(data_fim))
+    # Substitui os placeholders de forma segura
+for p in doc.paragraphs:
+    if p.text:
+        p.text = p.text.replace("{{NOME}}", nome)
+        p.text = p.text.replace("{{CPF}}", cpf)
+        p.text = p.text.replace("{{ENDERECO}}", endereco)
+        p.text = p.text.replace("{{VALOR}}", valor)
+        p.text = p.text.replace("{{DATA_INICIO}}", str(data_inicio))
+        p.text = p.text.replace("{{DATA_FIM}}", str(data_fim))
 
     # Salva o contrato em memória
     buffer = BytesIO()
