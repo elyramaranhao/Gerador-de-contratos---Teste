@@ -17,6 +17,9 @@ with st.form("formulario"):
     submitted = st.form_submit_button("Gerar contrato")
 
 # Se clicou no botão
+import os
+import tempfile
+
 if submitted:
     # Abre o modelo
     doc = Document("modelo_contrato.docx")
@@ -30,15 +33,23 @@ if submitted:
         p.text = p.text.replace("{{DATA_INICIO}}", str(data_inicio))
         p.text = p.text.replace("{{DATA_FIM}}", str(data_fim))
 
-    # Salva em memória (em vez de arquivo temporário no disco)
-    buffer = BytesIO()
-    doc.save(buffer)
-    buffer.seek(0)
+    # Cria arquivo temporário no disco
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmp_file:
+        temp_path = tmp_file.name
+        doc.save(temp_path)
 
+    # Lê o conteúdo do arquivo salvo
+    with open(temp_path, "rb") as f:
+        contrato_bytes = f.read()
+
+    # Remove o arquivo temporário do disco
+    os.remove(temp_path)
+
+    # Exibe botão de download
     st.success("✅ Contrato gerado com sucesso!")
     st.download_button(
         label="📥 Baixar contrato",
-        data=buffer,
+        data=contrato_bytes,
         file_name=f"Contrato_{nome}.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
