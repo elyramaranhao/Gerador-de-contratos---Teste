@@ -16,11 +16,13 @@ with st.form("formulario"):
     data_fim = st.date_input("Data de término", date.today())
     submitted = st.form_submit_button("Gerar contrato")
 
-# Só roda se o botão for clicado
+# Após clique no botão
 if submitted:
     try:
+        # Carrega modelo
         doc = Document("modelo_contrato.docx")
 
+        # Substituições
         for p in doc.paragraphs:
             if p.text:
                 p.text = p.text.replace("{{NOME}}", nome)
@@ -30,17 +32,22 @@ if submitted:
                 p.text = p.text.replace("{{DATA_INICIO}}", str(data_inicio))
                 p.text = p.text.replace("{{DATA_FIM}}", str(data_fim))
 
-        buffer = BytesIO()
-        doc.save(buffer)
-        buffer.seek(0)
+        # Salva em buffer com tipo correto
+        contrato_em_memoria = BytesIO()
+        doc.save(contrato_em_memoria)
+        contrato_em_memoria.seek(0)
+        contrato_bytes = contrato_em_memoria.getvalue()
 
-        st.success("✅ Contrato gerado com sucesso!")
-
-        st.download_button(
-            label="📥 Baixar contrato",
-            data=buffer.getvalue(),  # aqui está o segredo
-            file_name=f"Contrato_{nome}.docx",
-            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        )
+        # Valida o tipo de saída
+        if not isinstance(contrato_bytes, bytes):
+            st.error("❌ Erro: o conteúdo gerado não é um arquivo válido.")
+        else:
+            st.success("✅ Contrato gerado com sucesso!")
+            st.download_button(
+                label="📥 Baixar contrato",
+                data=contrato_bytes,
+                file_name=f"Contrato_{nome}.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
     except Exception as e:
-        st.error(f"Ocorreu um erro ao gerar o contrato: {e}")
+        st.error(f"Erro ao gerar contrato: {e}")
